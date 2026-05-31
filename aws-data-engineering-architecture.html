@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AWS Data Engineering Architecture – Senior Interview Reference</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f1117;color:#e2e8f0;line-height:1.6;font-size:14px}
+a{color:#60a5fa}
+h1{font-size:22px;font-weight:700;color:#f1f5f9;margin-bottom:4px}
+h2{font-size:16px;font-weight:600;color:#f1f5f9;margin:24px 0 10px}
+h3{font-size:14px;font-weight:600;color:#cbd5e1;margin:16px 0 8px}
+.container{max-width:1080px;margin:0 auto;padding:28px 20px}
+.subtitle{color:#94a3b8;font-size:13px;margin-bottom:20px}
+
+/* Tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tab{padding:5px 14px;border-radius:20px;border:1px solid #334155;background:transparent;color:#94a3b8;cursor:pointer;font-size:13px;transition:all .15s}
+.tab:hover{border-color:#60a5fa;color:#60a5fa}
+.tab.active{background:#1e40af;border-color:#3b82f6;color:#fff;font-weight:500}
+.section{display:none}
+.section.active{display:block}
+hr{border:none;border-top:1px solid #1e293b;margin:20px 0}
+
+/* Stats grid */
+.stats{display:grid;gap:12px;margin-bottom:20px}
+.stats-4{grid-template-columns:repeat(4,1fr)}
+.stats-3{grid-template-columns:repeat(3,1fr)}
+.stat-card{background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:14px 16px}
+.stat-value{font-size:20px;font-weight:700;color:#f1f5f9}
+.stat-value.info{color:#60a5fa}
+.stat-value.success{color:#34d399}
+.stat-value.warning{color:#fbbf24}
+.stat-value.danger{color:#f87171}
+.stat-label{font-size:11px;color:#64748b;margin-top:2px}
+
+/* Cards */
+.card{background:#0f172a;border:1px solid #1e293b;border-radius:8px;margin-bottom:12px;overflow:hidden}
+.card-header{padding:10px 14px;background:#111827;border-bottom:1px solid #1e293b;font-size:12px;font-weight:600;color:#cbd5e1;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.card-header:hover{background:#1a2234}
+.card-body{padding:14px 16px}
+.card-grid{display:grid;gap:12px}
+.card-grid-2{grid-template-columns:repeat(2,1fr)}
+.card-grid-3{grid-template-columns:repeat(3,1fr)}
+
+/* Callout */
+.callout{border-radius:8px;padding:12px 16px;margin-bottom:16px;border-left:3px solid}
+.callout.info{background:#1e3a5f22;border-color:#3b82f6}
+.callout.success{background:#14532d22;border-color:#22c55e}
+.callout.warning{background:#78350f22;border-color:#f59e0b}
+.callout.neutral{background:#1e293b;border-color:#475569}
+.callout-title{font-weight:600;margin-bottom:4px;font-size:13px}
+.callout.info .callout-title{color:#60a5fa}
+.callout.success .callout-title{color:#34d399}
+.callout.warning .callout-title{color:#fbbf24}
+.callout.neutral .callout-title{color:#94a3b8}
+.callout p{color:#94a3b8;font-size:13px}
+
+/* Pill */
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;border:1px solid #334155;font-size:11px;color:#94a3b8;white-space:nowrap}
+.pill.info{border-color:#3b82f680;color:#60a5fa}
+.pill.success{border-color:#22c55e80;color:#34d399}
+.pill.warning{border-color:#f59e0b80;color:#fbbf24}
+.pill.danger{border-color:#ef444480;color:#f87171}
+
+/* Tables */
+.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid #1e293b;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead{background:#111827}
+th{padding:9px 12px;text-align:left;font-weight:600;color:#94a3b8;white-space:nowrap;border-bottom:1px solid #1e293b}
+td{padding:8px 12px;border-bottom:1px solid #1e293b22;color:#cbd5e1;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:#0a0f1a}
+tr.row-info td{background:#1e3a5f15}
+tr.row-success td{background:#14532d15}
+tr.row-warning td{background:#78350f15}
+tr.row-danger td{background:#7f1d1d15}
+td .service-name{font-weight:600;color:#f1f5f9;white-space:nowrap}
+td .muted{color:#64748b;font-size:12px}
+td .mono{font-family:monospace;font-size:11px;color:#a78bfa}
+
+/* Architecture flow */
+.flow-scroll{overflow-x:auto;padding:8px 0;margin-bottom:16px}
+.flow-svg text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+/* Step list */
+.step-list{display:flex;flex-direction:column;gap:10px}
+.step-item{display:flex;gap:12px;align-items:flex-start}
+.step-num{min-width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.step-content{flex:1}
+.step-title{font-weight:600;color:#f1f5f9;font-size:13px;margin-bottom:2px}
+.step-desc{color:#64748b;font-size:12px}
+
+/* Collapsible */
+.collapsible .card-body{display:none}
+.collapsible.open .card-body{display:block}
+.chevron{transition:transform .2s}
+.collapsible.open .chevron{transform:rotate(180deg)}
+
+/* Best practices list */
+.bp-list{display:flex;flex-direction:column;gap:6px}
+.bp-item{display:flex;gap:8px;align-items:flex-start}
+.bp-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
+
+/* Q&A filters */
+.filter-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.filter-pill{padding:4px 12px;border-radius:16px;border:1px solid #334155;background:transparent;color:#94a3b8;cursor:pointer;font-size:12px;transition:all .15s}
+.filter-pill:hover{border-color:#60a5fa;color:#60a5fa}
+.filter-pill.active{background:#1e3a5f;border-color:#3b82f6;color:#60a5fa}
+
+/* Charts — pure CSS bar */
+.bar-chart{display:flex;flex-direction:column;gap:6px}
+.bar-row{display:flex;gap:8px;align-items:center}
+.bar-label{font-size:11px;color:#64748b;width:200px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;background:#1e293b;border-radius:3px;height:16px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:10px;color:#fff;font-weight:600;transition:width .4s}
+.bar-value{font-size:11px;color:#94a3b8;width:50px;flex-shrink:0}
+
+/* Responsive */
+@media(max-width:720px){
+  .stats-4,.stats-3,.card-grid-2,.card-grid-3{grid-template-columns:1fr}
+  .bar-label{width:120px}
+}
+
+/* Comparison sub-tabs */
+.sub-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.sub-tab{padding:4px 12px;border-radius:16px;border:1px solid #334155;background:transparent;color:#94a3b8;cursor:pointer;font-size:12px;transition:all .15s}
+.sub-tab:hover{border-color:#60a5fa;color:#60a5fa}
+.sub-tab.active{background:#1e293b;border-color:#475569;color:#e2e8f0}
+.comparison-panel{display:none}
+.comparison-panel.active{display:block}
+
+/* Advanced sub-tabs */
+.adv-panel{display:none}
+.adv-panel.active{display:block}
+.adv-content-block{background:#0f172a;border:1px solid #1e293b;border-radius:6px;padding:12px 14px;margin-bottom:8px;font-size:13px;color:#94a3b8}
+
+/* Print */
+@media print{body{background:#fff;color:#000}.tabs,.sub-tabs,.filter-pills{display:none}.section{display:block!important}.card{border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>AWS Data Engineering Architecture</h1>
+  <p class="subtitle">Production-grade, scalable real-time analytics platform &nbsp;·&nbsp; Senior interview reference &nbsp;·&nbsp; 1 GB → 20 GB/day growth path</p>
+
+  <div class="tabs" id="mainTabs">
+    <button class="tab active" onclick="showTab('overview',this)">Overview</button>
+    <button class="tab" onclick="showTab('services',this)">AWS Services</button>
+    <button class="tab" onclick="showTab('architecture',this)">Architecture</button>
+    <button class="tab" onclick="showTab('comparisons',this)">Comparisons</button>
+    <button class="tab" onclick="showTab('cost',this)">Cost &amp; Scale</button>
+    <button class="tab" onclick="showTab('advanced',this)">Advanced</button>
+    <button class="tab" onclick="showTab('interview',this)">Interview Q&amp;A</button>
+  </div>
+
+  <!-- ═══════════════ OVERVIEW ═══════════════ -->
+  <div class="section active" id="overview">
+
+    <div class="callout info">
+      <div class="callout-title">Executive Summary</div>
+      <p>A Medallion architecture (Bronze / Silver / Gold) on S3 with Apache Iceberg, powered by Kinesis + Glue Streaming for real-time ingestion, AWS Glue for batch ETL, Amazon Redshift for warehousing, and QuickSight for BI. Designed for daily growth from 1 GB to 20+ GB/day with cost-optimised auto-scaling, zero single points of failure, and full governance via Lake Formation + KMS.</p>
+    </div>
+
+    <div class="stats stats-4">
+      <div class="stat-card"><div class="stat-value info">1→20 GB</div><div class="stat-label">Daily Data Growth</div></div>
+      <div class="stat-card"><div class="stat-value">~$990</div><div class="stat-label">Current Monthly Cost</div></div>
+      <div class="stat-card"><div class="stat-value warning">~$3,215</div><div class="stat-label">Growth Monthly Cost</div></div>
+      <div class="stat-card"><div class="stat-value success">99.99%</div><div class="stat-label">Target Availability</div></div>
+    </div>
+    <div class="stats stats-3">
+      <div class="stat-card"><div class="stat-value">Bronze / Silver / Gold</div><div class="stat-label">Medallion Layers</div></div>
+      <div class="stat-card"><div class="stat-value info">Iceberg</div><div class="stat-label">Recommended Table Format</div></div>
+      <div class="stat-card"><div class="stat-value success">Parquet</div><div class="stat-label">Recommended File Format</div></div>
+    </div>
+
+    <h2>Architecture Flow</h2>
+    <div class="flow-scroll">
+      <svg width="960" height="160" class="flow-svg">
+        <defs><marker id="a" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#334155"/></marker></defs>
+        <!-- arrows top row -->
+        <line x1="130" y1="30" x2="160" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <line x1="290" y1="30" x2="320" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <line x1="450" y1="30" x2="480" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <line x1="610" y1="30" x2="640" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <line x1="770" y1="30" x2="800" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <!-- down -->
+        <line x1="865" y1="50" x2="865" y2="90" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <!-- bottom row arrows -->
+        <line x1="800" y1="110" x2="770" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <line x1="640" y1="110" x2="610" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <line x1="480" y1="110" x2="450" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <line x1="320" y1="110" x2="290" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <line x1="160" y1="110" x2="140" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#a)"/>
+        <!-- boxes -->
+        <g><rect x="10" y="10" width="120" height="40" rx="6" fill="#4A9EFF22" stroke="#4A9EFF" stroke-width="1.5"/><text x="70" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#4A9EFF">Data Sources</text><text x="70" y="38" text-anchor="middle" font-size="9" fill="#64748b">IoT / DB / API / Files</text></g>
+        <g><rect x="160" y="10" width="130" height="40" rx="6" fill="#4A9EFF22" stroke="#4A9EFF" stroke-width="1.5"/><text x="225" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#4A9EFF">Ingestion Layer</text><text x="225" y="38" text-anchor="middle" font-size="9" fill="#64748b">Kinesis / DMS / Firehose</text></g>
+        <g><rect x="320" y="10" width="130" height="40" rx="6" fill="#F59E0B22" stroke="#F59E0B" stroke-width="1.5"/><text x="385" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#F59E0B">Stream Processor</text><text x="385" y="38" text-anchor="middle" font-size="9" fill="#64748b">Glue Streaming / Lambda</text></g>
+        <g><rect x="480" y="10" width="130" height="40" rx="6" fill="#6B728022" stroke="#6B7280" stroke-width="1.5"/><text x="545" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">S3 Bronze</text><text x="545" y="38" text-anchor="middle" font-size="9" fill="#64748b">Raw landing / Parquet</text></g>
+        <g><rect x="640" y="10" width="130" height="40" rx="6" fill="#10B98122" stroke="#10B981" stroke-width="1.5"/><text x="705" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#10B981">Glue ETL</text><text x="705" y="38" text-anchor="middle" font-size="9" fill="#64748b">Bronze → Silver</text></g>
+        <g><rect x="800" y="10" width="130" height="40" rx="6" fill="#6B728022" stroke="#6B7280" stroke-width="1.5"/><text x="865" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">S3 Silver</text><text x="865" y="38" text-anchor="middle" font-size="9" fill="#64748b">Iceberg / Cleaned</text></g>
+        <g><rect x="800" y="90" width="130" height="40" rx="6" fill="#10B98122" stroke="#10B981" stroke-width="1.5"/><text x="865" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#10B981">Glue ETL</text><text x="865" y="118" text-anchor="middle" font-size="9" fill="#64748b">Silver → Gold</text></g>
+        <g><rect x="640" y="90" width="130" height="40" rx="6" fill="#6B728022" stroke="#6B7280" stroke-width="1.5"/><text x="705" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">S3 Gold</text><text x="705" y="118" text-anchor="middle" font-size="9" fill="#64748b">Aggregated / Star Schema</text></g>
+        <g><rect x="480" y="90" width="130" height="40" rx="6" fill="#8B5CF622" stroke="#8B5CF6" stroke-width="1.5"/><text x="545" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#8B5CF6">Redshift</text><text x="545" y="118" text-anchor="middle" font-size="9" fill="#64748b">Data Warehouse</text></g>
+        <g><rect x="320" y="90" width="130" height="40" rx="6" fill="#EC489922" stroke="#EC4899" stroke-width="1.5"/><text x="385" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#EC4899">QuickSight</text><text x="385" y="118" text-anchor="middle" font-size="9" fill="#64748b">Dashboards / Reports</text></g>
+        <g><rect x="160" y="90" width="130" height="40" rx="6" fill="#F59E0B22" stroke="#F59E0B" stroke-width="1.5"/><text x="225" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#F59E0B">Orchestration</text><text x="225" y="118" text-anchor="middle" font-size="9" fill="#64748b">MWAA / Step Functions</text></g>
+        <g><rect x="10" y="90" width="130" height="40" rx="6" fill="#EF444422" stroke="#EF4444" stroke-width="1.5"/><text x="75" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#EF4444">Monitoring</text><text x="75" y="118" text-anchor="middle" font-size="9" fill="#64748b">CloudWatch / Alerts</text></g>
+        <text x="480" y="152" text-anchor="middle" font-size="9" fill="#475569">End-to-End AWS Data Pipeline · Medallion Architecture (Bronze / Silver / Gold)</text>
+      </svg>
+    </div>
+
+    <h2>Pipeline Step-by-Step</h2>
+    <div class="step-list">
+      <div class="step-item"><div class="step-num" style="background:#4A9EFF22;border:1.5px solid #4A9EFF;color:#4A9EFF">1</div><div class="step-content"><div class="step-title">Data Sources <span class="pill info">Ingestion</span></div><div class="step-desc">IoT devices, application events, database CDC, SFTP files, REST API calls. Multiple heterogeneous sources producing structured/semi-structured data.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#4A9EFF22;border:1.5px solid #4A9EFF;color:#4A9EFF">2</div><div class="step-content"><div class="step-title">Ingestion Layer <span class="pill info">Ingestion</span></div><div class="step-desc">Kinesis Data Streams (real-time events) + Firehose (batch/delivery) + DMS (CDC from RDS) + DataSync (file transfers) + API Gateway (REST events).</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#F59E0B22;border:1.5px solid #F59E0B;color:#F59E0B">3</div><div class="step-content"><div class="step-title">Stream Processing <span class="pill warning">Streaming</span></div><div class="step-desc">AWS Glue Streaming or Lambda for real-time micro-batch processing. Deduplication, validation, enrichment, format conversion (JSON→Parquet).</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#6B728022;border:1.5px solid #6B7280;color:#94a3b8">4</div><div class="step-content"><div class="step-title">S3 Bronze Layer <span class="pill">Storage</span></div><div class="step-desc">Raw data landing zone. Partitioned by source/year/month/day. Parquet format. Versioning enabled. Lifecycle → Glacier after 90 days.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#6B728022;border:1.5px solid #6B7280;color:#94a3b8">5</div><div class="step-content"><div class="step-title">S3 Silver Layer <span class="pill">Storage</span></div><div class="step-desc">Cleaned, validated, deduplicated data. Schema-enforced Parquet with Apache Iceberg table format. Partitioned by business date. Glue Catalog registered.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#6B728022;border:1.5px solid #6B7280;color:#94a3b8">6</div><div class="step-content"><div class="step-title">S3 Gold Layer <span class="pill">Storage</span></div><div class="step-desc">Business-domain aggregated tables. Star/snowflake schema. Optimized for BI queries. Redshift Spectrum external tables + native Redshift tables.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#10B98122;border:1.5px solid #10B981;color:#10B981">7</div><div class="step-content"><div class="step-title">Glue ETL Jobs <span class="pill success">Processing</span></div><div class="step-desc">Bronze→Silver: clean, validate, deduplicate, apply schema. Silver→Gold: aggregate, enrich with dimension tables, compute KPIs. Orchestrated by MWAA/Step Functions.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#8B5CF622;border:1.5px solid #8B5CF6;color:#8B5CF6">8</div><div class="step-content"><div class="step-title">Amazon Redshift <span class="pill" style="border-color:#8B5CF680;color:#8B5CF6">Warehouse</span></div><div class="step-desc">Data warehouse for Gold layer reporting. RA3 nodes with Spectrum for S3 federation. Concurrency scaling for dashboard spikes. Materialized views for fast BI.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#EC489922;border:1.5px solid #EC4899;color:#EC4899">9</div><div class="step-content"><div class="step-title">Amazon QuickSight <span class="pill" style="border-color:#EC489980;color:#EC4899">BI</span></div><div class="step-desc">BI dashboards connected to Redshift. SPICE engine for fast renders. Row-level security for multi-tenant. Refresh: Daily scheduled + on-demand.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#F59E0B22;border:1.5px solid #F59E0B;color:#F59E0B">10</div><div class="step-content"><div class="step-title">Orchestration <span class="pill warning">Orchestration</span></div><div class="step-desc">MWAA (Airflow) DAGs orchestrate the full pipeline. Step Functions for AWS-native sub-workflows. EventBridge Scheduler for time-based triggers.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#6B728022;border:1.5px solid #6B7280;color:#94a3b8">11</div><div class="step-content"><div class="step-title">Monitoring &amp; Alerts <span class="pill">Monitoring</span></div><div class="step-desc">CloudWatch metrics + alarms: Kinesis iterator age, Glue job failures, Redshift queue depth, S3 data volume anomalies. PagerDuty/SNS notifications.</div></div></div>
+      <div class="step-item"><div class="step-num" style="background:#EF444422;border:1.5px solid #EF4444;color:#EF4444">12</div><div class="step-content"><div class="step-title">Security &amp; Governance <span class="pill danger">Security</span></div><div class="step-desc">Lake Formation for column/row-level access. KMS encryption everywhere. IAM least-privilege roles. Secrets Manager for credentials. VPC isolation.</div></div></div>
+    </div>
+
+    <h2>Key Design Decisions</h2>
+    <div class="card-grid card-grid-2">
+      <div class="card"><div class="card-header">Why Kinesis over MSK at launch</div><div class="card-body"><p style="font-size:13px;color:#94a3b8">At 1 GB/day, Kinesis costs ~$50/month vs MSK's $400+/month minimum. Use Kafka-compatible producer API from day 1 to enable zero-code migration to MSK when throughput exceeds 10 GB/day or multi-team consumption is needed.</p></div></div>
+      <div class="card"><div class="card-header">Why Iceberg over Hudi/Delta</div><div class="card-body"><p style="font-size:13px;color:#94a3b8">Iceberg is AWS's preferred table format with native support in Athena, Glue, EMR, and Redshift Spectrum. Hidden partitioning, schema evolution without rewrites, time travel for debugging, and ACID transactions. Best ecosystem fit for this AWS-native stack.</p></div></div>
+      <div class="card"><div class="card-header">Why Glue over EMR for ETL</div><div class="card-body"><p style="font-size:13px;color:#94a3b8">Serverless Glue eliminates cluster management. Job bookmarks enable incremental processing out-of-the-box. Integrated with Glue Data Catalog. When data grows beyond ~100 GB/job, migrate to EMR Spot for 60-80% cost savings.</p></div></div>
+      <div class="card"><div class="card-header">Why MWAA over Step Functions</div><div class="card-body"><p style="font-size:13px;color:#94a3b8">For complex multi-step pipelines with 10+ tasks, cross-system dependencies, and team familiarity with Airflow DAGs, MWAA provides richer orchestration. Use Step Functions for AWS-native sub-workflows embedded within Airflow DAGs.</p></div></div>
+    </div>
+
+    <h2>File Format Recommendations</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Format</th><th>Best For</th><th>Compression</th><th>Splittable</th><th>Schema Evolution</th><th>AWS Support</th></tr></thead>
+        <tbody>
+          <tr class="row-success"><td><span class="service-name">Parquet</span></td><td>Columnar analytics, BI, Gold layer</td><td>Snappy / ZSTD (50-75% reduction)</td><td>Yes</td><td>Add columns only</td><td>Athena, Glue, Redshift Spectrum, EMR — first-class</td></tr>
+          <tr><td><span class="service-name">ORC</span></td><td>Hive-heavy pipelines, predicate pushdown</td><td>ZLIB / Snappy</td><td>Yes</td><td>Limited</td><td>Glue, EMR, Hive — good; Athena slower than Parquet</td></tr>
+          <tr class="row-info"><td><span class="service-name">Avro</span></td><td>Row-based serialization, Kafka schema registry, CDC</td><td>Deflate / Snappy</td><td>No (single file)</td><td>Full (with Schema Registry)</td><td>MSK Schema Registry, Glue Schema Registry</td></tr>
+          <tr><td><span class="service-name">JSON</span></td><td>REST API responses, debugging, Bronze raw landing</td><td>None / GZIP</td><td>Yes (line-delimited)</td><td>N/A</td><td>All AWS services; expensive to query at scale</td></tr>
+          <tr class="row-success"><td><span class="service-name">Iceberg / Parquet</span></td><td>ACID transactions, time travel, upserts, Silver/Gold</td><td>Parquet underneath</td><td>Yes</td><td>Full (schema evolution)</td><td>Iceberg: Athena, Glue, EMR native. Recommended.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:11px;color:#475569;margin-top:-8px">Recommendation: Parquet (Gold), Iceberg/Parquet (Silver), JSON or Avro (Bronze raw)</p>
+  </div>
+
+  <!-- ═══════════════ AWS SERVICES ═══════════════ -->
+  <div class="section" id="services">
+    <h2>AWS Services Reference — by Layer</h2>
+    <p style="color:#64748b;font-size:13px;margin-bottom:16px">Click each layer heading to expand. All services include purpose, when to use, pros/cons, pricing, and use cases.</p>
+
+    <div id="svcList"></div>
+  </div>
+
+  <!-- ═══════════════ ARCHITECTURE ═══════════════ -->
+  <div class="section" id="architecture">
+    <h2>Recommended Production Architecture</h2>
+    <div class="flow-scroll">
+      <svg width="960" height="160" class="flow-svg">
+        <defs><marker id="b" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#334155"/></marker></defs>
+        <line x1="130" y1="30" x2="160" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="290" y1="30" x2="320" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="450" y1="30" x2="480" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="610" y1="30" x2="640" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="770" y1="30" x2="800" y2="30" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="865" y1="50" x2="865" y2="90" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="800" y1="110" x2="770" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="640" y1="110" x2="610" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="480" y1="110" x2="450" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="320" y1="110" x2="290" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <line x1="160" y1="110" x2="140" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#b)"/>
+        <g><rect x="10" y="10" width="120" height="40" rx="6" fill="#4A9EFF22" stroke="#4A9EFF" stroke-width="1.5"/><text x="70" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#4A9EFF">Data Sources</text><text x="70" y="38" text-anchor="middle" font-size="9" fill="#64748b">IoT / DB / API / Files</text></g>
+        <g><rect x="160" y="10" width="130" height="40" rx="6" fill="#4A9EFF22" stroke="#4A9EFF" stroke-width="1.5"/><text x="225" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#4A9EFF">Ingestion Layer</text><text x="225" y="38" text-anchor="middle" font-size="9" fill="#64748b">Kinesis / DMS / Firehose</text></g>
+        <g><rect x="320" y="10" width="130" height="40" rx="6" fill="#F59E0B22" stroke="#F59E0B" stroke-width="1.5"/><text x="385" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#F59E0B">Stream Processor</text><text x="385" y="38" text-anchor="middle" font-size="9" fill="#64748b">Glue Streaming / Lambda</text></g>
+        <g><rect x="480" y="10" width="130" height="40" rx="6" fill="#6B728022" stroke="#6B7280" stroke-width="1.5"/><text x="545" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">S3 Bronze</text><text x="545" y="38" text-anchor="middle" font-size="9" fill="#64748b">Raw landing / Parquet</text></g>
+        <g><rect x="640" y="10" width="130" height="40" rx="6" fill="#10B98122" stroke="#10B981" stroke-width="1.5"/><text x="705" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#10B981">Glue ETL</text><text x="705" y="38" text-anchor="middle" font-size="9" fill="#64748b">Bronze → Silver</text></g>
+        <g><rect x="800" y="10" width="130" height="40" rx="6" fill="#6B728022" stroke="#6B7280" stroke-width="1.5"/><text x="865" y="25" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">S3 Silver</text><text x="865" y="38" text-anchor="middle" font-size="9" fill="#64748b">Iceberg / Cleaned</text></g>
+        <g><rect x="800" y="90" width="130" height="40" rx="6" fill="#10B98122" stroke="#10B981" stroke-width="1.5"/><text x="865" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#10B981">Glue ETL</text><text x="865" y="118" text-anchor="middle" font-size="9" fill="#64748b">Silver → Gold</text></g>
+        <g><rect x="640" y="90" width="130" height="40" rx="6" fill="#6B728022" stroke="#6B7280" stroke-width="1.5"/><text x="705" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">S3 Gold</text><text x="705" y="118" text-anchor="middle" font-size="9" fill="#64748b">Aggregated / Star Schema</text></g>
+        <g><rect x="480" y="90" width="130" height="40" rx="6" fill="#8B5CF622" stroke="#8B5CF6" stroke-width="1.5"/><text x="545" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#8B5CF6">Redshift</text><text x="545" y="118" text-anchor="middle" font-size="9" fill="#64748b">Data Warehouse</text></g>
+        <g><rect x="320" y="90" width="130" height="40" rx="6" fill="#EC489922" stroke="#EC4899" stroke-width="1.5"/><text x="385" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#EC4899">QuickSight</text><text x="385" y="118" text-anchor="middle" font-size="9" fill="#64748b">Dashboards / Reports</text></g>
+        <g><rect x="160" y="90" width="130" height="40" rx="6" fill="#F59E0B22" stroke="#F59E0B" stroke-width="1.5"/><text x="225" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#F59E0B">Orchestration</text><text x="225" y="118" text-anchor="middle" font-size="9" fill="#64748b">MWAA / Step Functions</text></g>
+        <g><rect x="10" y="90" width="130" height="40" rx="6" fill="#EF444422" stroke="#EF4444" stroke-width="1.5"/><text x="75" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#EF4444">Monitoring</text><text x="75" y="118" text-anchor="middle" font-size="9" fill="#64748b">CloudWatch / Alerts</text></g>
+        <text x="480" y="152" text-anchor="middle" font-size="9" fill="#475569">End-to-End AWS Data Pipeline · Medallion Architecture (Bronze / Silver / Gold)</text>
+      </svg>
+    </div>
+
+    <h2>Detailed Component Breakdown</h2>
+    <div class="card-grid card-grid-2">
+      <div class="card"><div class="card-header">Layer 1: Data Ingestion <span class="pill info">Ingestion</span></div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">Real-time events → Kinesis:</strong> 5 shards initially (5 MB/s capacity). Enhanced fan-out. 7-day retention for replay.<br><br><strong style="color:#cbd5e1">CDC → DMS:</strong> Ongoing replication from RDS/Aurora. Deliver to Kinesis or directly to S3 Bronze. t3.medium for &lt;1 GB/day.<br><br><strong style="color:#cbd5e1">File drops → S3 + Lambda:</strong> S3 event notification → Lambda validates/routes → Step Functions orchestrate.<br><br><strong style="color:#cbd5e1">REST APIs → API Gateway → Kinesis:</strong> Direct integration (no Lambda). Reduces cost and latency.</p></div></div>
+      <div class="card"><div class="card-header">Layer 2: Stream Processing <span class="pill warning">Streaming</span></div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">Kinesis → Firehose:</strong> Buffer 300s or 128 MB. Transform via Lambda (JSON→Parquet). Deliver to S3 Bronze partitioned by date.<br><br><strong style="color:#cbd5e1">Kinesis → Glue Streaming:</strong> When real-time enrichment needed (join with DynamoDB dim tables). 5-min micro-batch. Writes to S3 Silver directly.<br><br><strong style="color:#cbd5e1">DLQ:</strong> Malformed records → S3 DLQ prefix. Lambda alert via SNS. Manual review + Kinesis replay.</p></div></div>
+      <div class="card"><div class="card-header">Layer 3: Medallion Data Lake <span class="pill">Storage</span></div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">Bronze:</strong> s3://bucket/bronze/ · Partition: source/year/month/day/hour · Parquet · Versioning ON · Lifecycle: Standard 90d → IA → Glacier 1yr.<br><br><strong style="color:#cbd5e1">Silver:</strong> s3://bucket/silver/ · Iceberg table format · Partition: source/date · Cleaned, validated, deduped · Glue Catalog · LF column security on PII.<br><br><strong style="color:#cbd5e1">Gold:</strong> s3://bucket/gold/ · Aggregated by business domain · Partition: domain/date · Star schema · Optimized for Redshift Spectrum + BI.</p></div></div>
+      <div class="card"><div class="card-header">Layer 4: ETL/ELT Processing <span class="pill success">Processing</span></div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">Bronze→Silver Glue Job:</strong> Every 30 min. Job bookmarks incremental. Validate schema, dedup on (entity_id, event_time), mask PII, write Iceberg Silver.<br><br><strong style="color:#cbd5e1">Silver→Gold Glue Job:</strong> Daily at 2AM. Join fact + dimension tables. Compute KPIs. Write Gold Parquet + COPY to Redshift.<br><br><strong style="color:#cbd5e1">Compaction Job:</strong> Weekly Glue Iceberg OPTIMIZE. Merges small files into 256 MB+ Parquet. Reduces Athena scan cost by 30%.</p></div></div>
+      <div class="card"><div class="card-header">Layer 5: Redshift Warehouse <span class="pill info">Warehouse</span></div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">Config:</strong> RA3.xlplus × 2 nodes. Separate storage (S3-backed). Scheduled pause 10PM-6AM (saves 67% off-hours).<br><br><strong style="color:#cbd5e1">Spectrum:</strong> External tables → S3 Gold Iceberg. Query cold data without loading. Hot data (last 30 days) in native Redshift tables.<br><br><strong style="color:#cbd5e1">Optimization:</strong> Sort keys on date + entity_id. DISTKEY on high-join columns. Materialized views for dashboards. WLM queues for BI vs ETL.</p></div></div>
+      <div class="card"><div class="card-header">Layer 6: Security &amp; Governance <span class="pill danger">Security</span></div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">Encryption:</strong> S3 SSE-KMS with CMK. Redshift + Kinesis encrypted. KMS key rotation annually. All data in transit: TLS 1.2+.<br><br><strong style="color:#cbd5e1">Access:</strong> Lake Formation column-level security on Silver PII (mask email, phone for non-admin). Row-level filters for multi-tenant. IAM least-privilege roles per service.<br><br><strong style="color:#cbd5e1">Audit:</strong> CloudTrail all S3/Glue/Redshift API calls. LF audit logs. Redshift audit logging to S3. Weekly IAM access review.</p></div></div>
+    </div>
+
+    <h2>Failure Handling Strategy</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Failure Scenario</th><th>Detection</th><th>Response</th><th>RTO</th></tr></thead>
+        <tbody>
+          <tr><td><span class="service-name">Kinesis shard throttling</span></td><td>CloudWatch IteratorAgeMilliseconds &gt; 60s alarm</td><td>Auto-scale shards (Kinesis on-demand) or add shards manually. Firehose retries automatically.</td><td>&lt; 5 min</td></tr>
+          <tr><td><span class="service-name">Glue job failure</span></td><td>CloudWatch Glue job state = FAILED → SNS</td><td>Step Functions retry with exponential backoff (3 attempts). Job bookmarks prevent reprocessing.</td><td>&lt; 30 min</td></tr>
+          <tr><td><span class="service-name">Redshift cluster failure</span></td><td>CloudWatch CPUUtilization / cluster health alarms</td><td>Restore from automated snapshot (RPO = 8hrs or continuous with S3 Spectrum data).</td><td>&lt; 2 hrs</td></tr>
+          <tr><td><span class="service-name">S3 object corruption</span></td><td>S3 Object Integrity checksums (CRC32C)</td><td>Restore from versioned previous object. Reprocess from Bronze (immutable source of truth).</td><td>&lt; 1 hr</td></tr>
+          <tr><td><span class="service-name">DMS replication lag</span></td><td>CloudWatch CDCLatencySource + CDCLatencyTarget alarms</td><td>Alert if &gt; 5 min lag. Investigate source DB load. Increase DMS instance size.</td><td>&lt; 15 min</td></tr>
+          <tr><td><span class="service-name">MWAA DAG failure</span></td><td>Airflow task failure alert → SNS</td><td>Auto-retry (task-level retry=3). Critical pipelines have on-call runbooks.</td><td>&lt; 1 hr</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════ COMPARISONS ═══════════════ -->
+  <div class="section" id="comparisons">
+    <h2>AWS Service Comparisons</h2>
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="showComp(0,this)">Kinesis vs MSK</button>
+      <button class="sub-tab" onclick="showComp(1,this)">Redshift vs Athena</button>
+      <button class="sub-tab" onclick="showComp(2,this)">Glue vs EMR</button>
+      <button class="sub-tab" onclick="showComp(3,this)">Lambda vs ECS</button>
+      <button class="sub-tab" onclick="showComp(4,this)">Batch vs Streaming</button>
+      <button class="sub-tab" onclick="showComp(5,this)">Data Lake vs Warehouse</button>
+    </div>
+
+    <div class="comparison-panel active" id="comp0">
+      <h3>Kinesis Data Streams vs Amazon MSK (Kafka)</h3>
+      <div class="table-wrap"><table><thead><tr><th>Dimension</th><th>Amazon Kinesis</th><th>Amazon MSK (Kafka)</th></tr></thead><tbody>
+        <tr><td>Management</td><td>Fully managed; zero ops</td><td>Managed brokers; still need topic/schema mgmt</td></tr>
+        <tr><td>Throughput</td><td>1 MB/s write per shard; scale by adding shards</td><td>Unlimited; scale brokers horizontally</td></tr>
+        <tr><td>Latency</td><td>~70ms p99</td><td>~5ms p99 with proper config</td></tr>
+        <tr><td>Retention</td><td>1–365 days</td><td>Unlimited (based on disk)</td></tr>
+        <tr><td>Consumer model</td><td>Single iterator per shard; KCL for fan-out</td><td>Consumer groups; unlimited consumers</td></tr>
+        <tr><td>Ecosystem</td><td>AWS-native only (Firehose, Lambda, Flink)</td><td>Full Kafka: Connect, KSQL, Schema Registry</td></tr>
+        <tr><td>Cost at 1 GB/day</td><td>~$15/month (5 shards)</td><td>~$200/month (3 broker minimum)</td></tr>
+        <tr><td>Cost at 20 GB/day</td><td>~$120/month (scalable)</td><td>~$300/month (same cluster + partitions)</td></tr>
+        <tr class="row-success"><td>Best for</td><td>Simple AWS pipelines; low-medium volume; fast start</td><td>High throughput; multi-team; Kafka-native apps</td></tr>
+        <tr class="row-info"><td><strong>Verdict</strong></td><td colspan="2"><strong>START with Kinesis</strong> (1 GB/day, AWS-native, low ops). <strong>Migrate to MSK</strong> when sustained &gt;10 GB/day or multi-consumer needed.</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="comparison-panel" id="comp1">
+      <h3>Amazon Redshift vs Amazon Athena</h3>
+      <div class="table-wrap"><table><thead><tr><th>Dimension</th><th>Amazon Redshift</th><th>Amazon Athena</th></tr></thead><tbody>
+        <tr><td>Architecture</td><td>Dedicated cluster or serverless; columnar MPP</td><td>Serverless Presto on S3; no cluster</td></tr>
+        <tr><td>Query latency</td><td>Sub-second for BI dashboards</td><td>Seconds to minutes depending on scan size</td></tr>
+        <tr><td>Best query type</td><td>Repeated complex SQL; aggregations; joins on large tables</td><td>Ad-hoc exploration; infrequent analytics; log analysis</td></tr>
+        <tr><td>Pricing model</td><td>Per hour (provisioned) or per RPU-second (serverless)</td><td>$5/TB scanned; FREE with Parquet + partitions</td></tr>
+        <tr><td>Data location</td><td>Data loaded INTO Redshift (or Spectrum for S3)</td><td>Data stays IN S3; no loading required</td></tr>
+        <tr><td>Concurrency</td><td>Concurrency scaling (extra clusters auto-added)</td><td>Unlimited serverless; no concurrency limits</td></tr>
+        <tr><td>Schema changes</td><td>ALTER TABLE; limited; requires migration</td><td>Add partitions to Glue Catalog; extremely flexible</td></tr>
+        <tr class="row-info"><td><strong>Verdict</strong></td><td>Use for Gold layer reporting + QuickSight BI</td><td>Use for Bronze/Silver exploration + ad-hoc analysis</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="comparison-panel" id="comp2">
+      <h3>AWS Glue vs Amazon EMR</h3>
+      <div class="table-wrap"><table><thead><tr><th>Dimension</th><th>AWS Glue</th><th>Amazon EMR</th></tr></thead><tbody>
+        <tr><td>Management</td><td>Fully serverless; zero cluster ops</td><td>Managed cluster; still need sizing, config</td></tr>
+        <tr><td>Startup time</td><td>2–10 min cold start</td><td>5–15 min cluster bootstrap</td></tr>
+        <tr><td>Spark version</td><td>Managed; limited customization</td><td>Any Spark version; full configuration control</td></tr>
+        <tr><td>Table formats</td><td>Iceberg, Hudi, Delta (with config)</td><td>Native Iceberg, Hudi, Delta; full control</td></tr>
+        <tr><td>Cost (1 hr job)</td><td>20 DPU × $0.44 = $8.80/hr</td><td>r5.xlarge Spot × 5 nodes ≈ $0.30/hr (90% cheaper)</td></tr>
+        <tr><td>Best for</td><td>Managed ETL pipelines; catalog; medium scale</td><td>Petabyte-scale; custom Spark apps; ML training</td></tr>
+        <tr><td>Incremental load</td><td>Job bookmarks (built-in)</td><td>Custom checkpoint logic required</td></tr>
+        <tr class="row-info"><td><strong>Verdict</strong></td><td>START HERE for ETL; low ops overhead</td><td>MIGRATE for large scale or specialized Spark workloads</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="comparison-panel" id="comp3">
+      <h3>AWS Lambda vs Amazon ECS / EKS</h3>
+      <div class="table-wrap"><table><thead><tr><th>Dimension</th><th>AWS Lambda</th><th>Amazon ECS / EKS</th></tr></thead><tbody>
+        <tr><td>Runtime limit</td><td>15 minutes max</td><td>Unlimited</td></tr>
+        <tr><td>Memory</td><td>Up to 10 GB RAM</td><td>Up to EC2 instance size (hundreds of GB)</td></tr>
+        <tr><td>State</td><td>Stateless; external state only</td><td>Stateful; persistent in-container storage</td></tr>
+        <tr><td>Cold start</td><td>100ms–10s depending on runtime/VPC</td><td>Container pull: 30–60s; then warm</td></tr>
+        <tr><td>Scaling</td><td>Auto-scale to 1000 concurrent (burst limit)</td><td>Auto-scaling groups; ECS Service scaling</td></tr>
+        <tr><td>Cost</td><td>$0.20/million + compute time; free for low volume</td><td>Fargate: $0.04/vCPU-hr + $0.004/GB-hr; always-on</td></tr>
+        <tr class="row-info"><td><strong>Verdict</strong></td><td>Prefer for event triggers, small transforms, orchestration glue</td><td>Prefer for streaming consumers, Flink, long processing jobs</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="comparison-panel" id="comp4">
+      <h3>Batch vs Streaming Architecture</h3>
+      <div class="card-grid card-grid-2">
+        <div class="card"><div class="card-header">Batch Processing</div><div class="card-body">
+          <div class="table-wrap"><table><thead><tr><th>Property</th><th>Batch</th></tr></thead><tbody>
+            <tr><td>Latency</td><td>Minutes to hours</td></tr>
+            <tr><td>Complexity</td><td>Low — simple scheduling</td></tr>
+            <tr><td>Cost</td><td>Lower — pay only during job runtime</td></tr>
+            <tr><td>Use case</td><td>Daily reports, historical analysis, ML training</td></tr>
+            <tr><td>AWS services</td><td>Glue + MWAA + Redshift COPY</td></tr>
+            <tr><td>Failure recovery</td><td>Re-run job from checkpoint</td></tr>
+          </tbody></table></div>
+        </div></div>
+        <div class="card"><div class="card-header">Streaming Processing</div><div class="card-body">
+          <div class="table-wrap"><table><thead><tr><th>Property</th><th>Streaming</th></tr></thead><tbody>
+            <tr><td>Latency</td><td>Milliseconds to seconds</td></tr>
+            <tr><td>Complexity</td><td>High — state, ordering, late data</td></tr>
+            <tr><td>Cost</td><td>Higher — always-on consumers</td></tr>
+            <tr><td>Use case</td><td>Real-time fraud, live dashboards, IoT alerting</td></tr>
+            <tr><td>AWS services</td><td>Kinesis + Glue Streaming + Lambda + OpenSearch</td></tr>
+            <tr><td>Failure recovery</td><td>Replay from Kinesis retention window</td></tr>
+          </tbody></table></div>
+        </div></div>
+      </div>
+      <div class="callout info" style="margin-top:16px"><div class="callout-title">Lambda Architecture (Hybrid — Recommended)</div><p>Streaming path handles real-time ingestion and validation. Batch path handles complex aggregations and Gold layer. QuickSight reads Redshift Gold (batch-refreshed daily) for KPIs, and OpenSearch for real-time operational metrics.</p></div>
+    </div>
+
+    <div class="comparison-panel" id="comp5">
+      <h3>S3 Data Lake vs Redshift Warehouse</h3>
+      <div class="table-wrap"><table><thead><tr><th>Dimension</th><th>S3 Data Lake</th><th>Redshift Warehouse</th></tr></thead><tbody>
+        <tr><td>Schema</td><td>Schema-on-read (flexible)</td><td>Schema-on-write (rigid, optimized)</td></tr>
+        <tr><td>Data types</td><td>Any: structured, semi-structured, unstructured</td><td>Structured/relational only</td></tr>
+        <tr><td>Query engine</td><td>Athena, Glue, EMR, Redshift Spectrum (multiple)</td><td>Redshift SQL only (single engine)</td></tr>
+        <tr><td>Cost</td><td>$0.023/GB storage + query cost</td><td>$1-10/hr compute (always provisioned)</td></tr>
+        <tr><td>Performance</td><td>Seconds to minutes (depends on partitioning)</td><td>Sub-second (with indexes/materialized views)</td></tr>
+        <tr><td>Scale</td><td>Unlimited (exabyte-scale)</td><td>Petabyte but needs resize</td></tr>
+        <tr class="row-info"><td><strong>Use in this arch</strong></td><td>Bronze, Silver layers (data lake)</td><td>Gold layer BI tables (fast dashboard queries)</td></tr>
+      </tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ COST & SCALE ═══════════════ -->
+  <div class="section" id="cost">
+    <h2>Estimated Monthly Cost Breakdown</h2>
+    <div class="stats stats-4" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-value">$990</div><div class="stat-label">Current (1 GB/day) /month</div></div>
+      <div class="stat-card"><div class="stat-value warning">$3,215</div><div class="stat-label">Growth (20 GB/day) /month</div></div>
+      <div class="stat-card"><div class="stat-value success">3.25x</div><div class="stat-label">Cost multiplier for 20x data</div></div>
+      <div class="stat-card"><div class="stat-value info">Sub-linear</div><div class="stat-label">Cost scaling efficiency</div></div>
+    </div>
+
+    <div class="card-grid card-grid-2">
+      <div class="card"><div class="card-header">Current Phase: 1 GB/day</div><div class="card-body">
+        <div class="bar-chart" id="costChart1"></div>
+      </div></div>
+      <div class="card"><div class="card-header">Growth Phase: 20 GB/day</div><div class="card-body">
+        <div class="bar-chart" id="costChart2"></div>
+      </div></div>
+    </div>
+
+    <h2>Cost Breakdown Table</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Service</th><th>Current (1 GB/day) $/mo</th><th>Growth (20 GB/day) $/mo</th><th>Scaling Driver</th></tr></thead>
+        <tbody>
+          <tr><td>Kinesis Data Streams</td><td>$50</td><td>$200</td><td>Add shards as throughput grows (5→30 shards)</td></tr>
+          <tr><td>Kinesis Firehose</td><td>$15</td><td>$175</td><td>Linear with data volume ingested</td></tr>
+          <tr><td>Amazon S3 (3 layers)</td><td>$25</td><td>$180</td><td>Cumulative storage; Intelligent-Tiering after 90 days</td></tr>
+          <tr><td>AWS Glue ETL</td><td>$40</td><td>$250</td><td>DPU-hours; larger jobs; more frequent Silver→Gold runs</td></tr>
+          <tr><td>Amazon Redshift</td><td>$280</td><td>$750</td><td>Upgrade: RA3.xlplus → RA3.4xlarge</td></tr>
+          <tr><td>Amazon MWAA</td><td>$350</td><td>$600</td><td>Upgrade environment size for more concurrent tasks</td></tr>
+          <tr><td>CloudWatch + Alerts</td><td>$30</td><td>$100</td><td>More metrics, logs, alarms at scale</td></tr>
+          <tr><td>QuickSight</td><td>$120</td><td>$480</td><td>More authors/readers as adoption grows</td></tr>
+          <tr><td>Lambda + API Gateway</td><td>$20</td><td>$80</td><td>Linear with API call volume</td></tr>
+          <tr><td>DMS / MSK</td><td>$60</td><td>$400</td><td>Add MSK if multi-consumer needed at scale</td></tr>
+          <tr class="row-info"><td><strong>TOTAL</strong></td><td><strong>$990</strong></td><td><strong>$3,215</strong></td><td>3.25x growth for 20x data — good scaling efficiency</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Scaling Strategy by Phase</h2>
+    <div class="card-grid card-grid-3">
+      <div class="card"><div class="card-header">Phase 1: 1–5 GB/day</div><div class="card-body"><p style="font-size:13px;color:#94a3b8">Kinesis 5-15 shards. Glue G.1X (4 vCPU). Redshift RA3.xlplus 2-node. MWAA Small. Athena for ad-hoc.<br><br><strong style="color:#34d399">Total: ~$1,000–1,500/month</strong></p></div></div>
+      <div class="card"><div class="card-header">Phase 2: 5–15 GB/day</div><div class="card-body"><p style="font-size:13px;color:#94a3b8">Kinesis 15-30 shards or On-Demand. Glue G.2X or EMR Spot for large jobs. Redshift RA3.4xlarge 2-node. MWAA Medium.<br><br><strong style="color:#fbbf24">Total: ~$2,000–2,500/month</strong></p></div></div>
+      <div class="card"><div class="card-header">Phase 3: 15–50 GB/day</div><div class="card-body"><p style="font-size:13px;color:#94a3b8">Migrate streaming to MSK (multi-consumer). EMR for major Spark jobs. Redshift RA3.16xlarge or Serverless. Consider Snowflake.<br><br><strong style="color:#f87171">Total: ~$3,000–5,000/month</strong></p></div></div>
+    </div>
+
+    <h2>Cost Optimization Techniques</h2>
+    <div class="card-grid card-grid-2">
+      <div class="card"><div class="card-header">S3 Storage Optimization</div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">S3 Intelligent-Tiering:</strong> Enable on Bronze layer. AWS auto-moves objects between tiers. Saves 30-40% on rarely accessed data. No retrieval fees for Frequent/Infrequent tiers.<br><br><strong style="color:#cbd5e1">Lifecycle Policies:</strong> Bronze: Standard 90d → IA 90d → Glacier 1yr. Silver: Standard 180d → IA. Gold: Standard always. Saves $0.019/GB vs Standard.<br><br><strong style="color:#cbd5e1">Columnar Compression:</strong> Parquet + Snappy reduces storage 60-75% vs raw JSON. Reduces Athena scan cost proportionally.</p></div></div>
+      <div class="card"><div class="card-header">Compute Cost Optimization</div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">Redshift Scheduled Pause:</strong> Pause 10PM–6AM + weekends. Saves 67% of compute cost. RA3 storage persists during pause.<br><br><strong style="color:#cbd5e1">EMR Spot Instances:</strong> r5.xlarge Spot ~$0.06/hr vs on-demand $0.25/hr. 60-80% savings. Use instance fleets for Spot availability.<br><br><strong style="color:#cbd5e1">Kinesis On-Demand:</strong> Auto-scales shards during rapid growth phase. Eliminates hot-shard throttling during spikes.</p></div></div>
+      <div class="card"><div class="card-header">Query Cost Optimization</div><div class="card-body"><p style="font-size:13px;color:#94a3b8"><strong style="color:#cbd5e1">Athena Partitioning:</strong> Always filter on partition columns. Reduces cost from $500/month to $50/month on same data volume.<br><br><strong style="color:#cbd5e1">Materialized Views:</strong> Pre-compute expensive aggregations. Dashboard queries hit MV (fast) instead of raw tables (expensive).<br><br><strong style="color:#cbd5e1">Result Caching:</strong> Athena 24h cache. Redshift result cache. QuickSight SPICE eliminates per-refresh Redshift compute cost.</p></div></div>
+      <div class="card"><div class="card-header">Disaster Recovery</div><div class="card-body">
+        <div class="table-wrap"><table><thead><tr><th>Component</th><th>RPO</th><th>RTO</th></tr></thead><tbody>
+          <tr><td>S3 Bronze/Silver/Gold</td><td>0 (continuous)</td><td>&lt; 5 min</td></tr>
+          <tr><td>Redshift</td><td>1 hr (enhanced)</td><td>&lt; 2 hrs</td></tr>
+          <tr><td>Kinesis</td><td>7 days retention</td><td>&lt; 15 min</td></tr>
+          <tr><td>DynamoDB State</td><td>Seconds</td><td>&lt; 1 min</td></tr>
+          <tr><td>MWAA</td><td>N/A (stateless)</td><td>&lt; 30 min</td></tr>
+        </tbody></table></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ADVANCED ═══════════════ -->
+  <div class="section" id="advanced">
+    <h2>Advanced Data Engineering Topics</h2>
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="showAdv(0,this)">Medallion Architecture</button>
+      <button class="sub-tab" onclick="showAdv(1,this)">Exactly-Once</button>
+      <button class="sub-tab" onclick="showAdv(2,this)">Data Quality</button>
+      <button class="sub-tab" onclick="showAdv(3,this)">Incremental Processing</button>
+      <button class="sub-tab" onclick="showAdv(4,this)">Small Files</button>
+      <button class="sub-tab" onclick="showAdv(5,this)">CDC &amp; Schema Evolution</button>
+    </div>
+
+    <div class="adv-panel active" id="adv0">
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Bronze (Raw):</strong> Exact copy of source data. No transformation. Schema-on-read. S3 path: s3://bucket/bronze/source=salesforce/year=2024/month=01/day=15/. Format: Raw JSON or Parquet. Retention: 2 years in Standard, then Glacier. Purpose: audit trail, reprocessing source for Silver.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Silver (Curated):</strong> Cleaned, validated, deduplicated. Schema-on-write with Iceberg. Business rules applied. PII masked (SHA-256 hash or tokenized). Null handling. Duplicate detection on event_id + event_timestamp. Schema validation via Glue Schema Registry.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Gold (Business):</strong> Pre-aggregated, domain-specific tables. Examples: daily_sales_by_region, hourly_active_users, monthly_churn_rate. Optimized for BI tools. May be in Redshift (fast queries) or S3 + Redshift Spectrum. Partitioned by business date dimensions.</div>
+    </div>
+
+    <div class="adv-panel" id="adv1">
+      <div class="adv-content-block"><strong style="color:#f1f5f9">At-Least-Once:</strong> Messages may be delivered multiple times. Simpler to implement. Requires idempotent downstream processing. Kinesis KCL uses checkpoint in DynamoDB — on restart, reprocesses from last checkpoint. May process last batch twice. Mitigation: MERGE/UPSERT instead of INSERT; unique dedup key in target.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Exactly-Once:</strong> Each message processed exactly once. Requires distributed transactions or idempotent producers + transactional consumers. Kafka transactions (beginTransaction/commitTransaction) provide exactly-once between Kafka topics. Kinesis → Lambda → DynamoDB can achieve exactly-once with conditional writes.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Practical Advice:</strong> At-least-once + idempotent writes = effectively-once. In practice, full exactly-once semantics have significant overhead (2x latency). Design for at-least-once with MERGE semantics in Gold layer. This is the pragmatic production standard.</div>
+    </div>
+
+    <div class="adv-panel" id="adv2">
+      <div class="table-wrap"><table><thead><tr><th>Check Type</th><th>Layer</th><th>Tool</th><th>Action on Failure</th><th>Metric</th></tr></thead><tbody>
+        <tr><td>Schema validation</td><td>Bronze ingestion</td><td>Glue Schema Registry / Lambda</td><td>Route to DLQ + SNS alert</td><td>schema_violation_rate</td></tr>
+        <tr><td>Null checks</td><td>Silver ETL</td><td>AWS Deequ / Great Expectations</td><td>Stop job + alert + DQ report in S3</td><td>null_rate per column</td></tr>
+        <tr><td>Duplicate detection</td><td>Silver ETL</td><td>Spark dropDuplicates on (entity_id, ts)</td><td>Log duplicate count to CloudWatch</td><td>duplicate_rate</td></tr>
+        <tr><td>Row count anomaly</td><td>Silver/Gold</td><td>CloudWatch custom metric + ML anomaly</td><td>Alert if count &lt; 80% of 7-day avg</td><td>daily_row_count</td></tr>
+        <tr><td>Referential integrity</td><td>Gold ETL</td><td>LEFT JOIN + null check on FK</td><td>Quarantine orphans to _unmatched/ prefix</td><td>orphan_rate</td></tr>
+        <tr><td>Business rule validation</td><td>Gold ETL</td><td>Custom Spark validation UDFs</td><td>Fail records + log to data_quality_log</td><td>business_rule_fail_rate</td></tr>
+        <tr><td>Freshness check</td><td>Dashboard layer</td><td>Airflow sensor + CloudWatch</td><td>Alert if Gold not updated by 7AM</td><td>pipeline_freshness_minutes</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="adv-panel" id="adv3">
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Glue Job Bookmarks:</strong> Track the last processed S3 key/DynamoDB record. On next run, start from where it left off. Simple, built-in, works for append-only workloads.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Watermark-based:</strong> Track max(event_timestamp) per source in DynamoDB. Next run queries: WHERE event_timestamp &gt; last_watermark. Handles late-arriving data with configurable tolerance window (e.g., accept data up to 24 hours late).</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Partition-based:</strong> Process only new S3 partitions (year=2024/month=01/day=15). Glue job scans Glue Catalog for partitions added after last_run_time. Most efficient for daily batch pipelines.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Iceberg Incremental Scan:</strong> Use Iceberg's incremental append — read only files added between snapshot_id_1 and snapshot_id_2. No watermarks needed. Works with late data and schema evolution simultaneously.</div>
+    </div>
+
+    <div class="adv-panel" id="adv4">
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Root Causes:</strong> High-frequency Firehose writes (every 60s → 1,440 files/day), high partition cardinality (date × region × product = thousands of partitions each with 1 file), streaming micro-batch every 5 minutes.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Prevention:</strong> Firehose buffer window 300-900s for &gt;100 MB files. Spark coalesce(numPartitions) before writing. Iceberg hidden partitioning merges small writes into larger files automatically.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Reactive Compaction:</strong> Daily Glue/EMR Spark job: spark.read.parquet(partition_path).coalesce(1).write.parquet(partition_path). Iceberg OPTIMIZE TABLE (rewrites small files ≥128 MB). VACUUM to remove orphan files.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Target:</strong> 128 MB – 1 GB per Parquet file for optimal Athena/Spark read performance. Track file count per S3 prefix in CloudWatch. Alert when average file size &lt; 50 MB.</div>
+    </div>
+
+    <div class="adv-panel" id="adv5">
+      <div class="adv-content-block"><strong style="color:#f1f5f9">CDC Options:</strong> (1) AWS DMS with ongoing replication — captures WAL logs from Postgres/MySQL, delivers to S3 or Kinesis. (2) Debezium on MSK Connect — open-source CDC connector, more flexible, better community support. (3) Aurora MySQL has native binlog streaming. Choose DMS for simplicity, Debezium for Kafka-native architectures.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Schema Evolution:</strong> (1) Use Apache Iceberg/Hudi — both support schema evolution (add columns, rename fields) with backward/forward compatibility. (2) AWS Glue Schema Registry with Avro/JSON Schema — validates messages at ingestion. (3) Glue Catalog schema versioning — tracks all historical schemas. Strategy: allow additive changes automatically; breaking changes require a new table version or migration script.</div>
+      <div class="adv-content-block"><strong style="color:#f1f5f9">Delta vs Iceberg vs Hudi (AWS):</strong> <br>• <strong style="color:#cbd5e1">Iceberg</strong> — AWS preferred format. Native: Athena, Glue, EMR, Redshift Spectrum. Best schema evolution + hidden partitioning. RECOMMENDED for new AWS projects.<br>• <strong style="color:#cbd5e1">Hudi</strong> — Best for CDC/upsert-heavy workloads. MoR vs CoW write modes. Strong DMS integration. Used in fintech for real-time CDC.<br>• <strong style="color:#cbd5e1">Delta Lake</strong> — Best for Databricks users. Native on EMR but less AWS-native integration. Excellent time travel.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ INTERVIEW Q&A ═══════════════ -->
+  <div class="section" id="interview">
+    <h2>Senior Interview Q&amp;A</h2>
+    <p style="color:#64748b;font-size:13px;margin-bottom:16px">Production-grade answers for Senior Data Engineer, System Design, and AWS Solutions Architect interviews.</p>
+
+    <div class="filter-pills" id="qaFilters">
+      <button class="filter-pill active" onclick="filterQA('All',this)">All</button>
+      <button class="filter-pill" onclick="filterQA('Design Decisions',this)">Design Decisions</button>
+      <button class="filter-pill" onclick="filterQA('Streaming',this)">Streaming</button>
+      <button class="filter-pill" onclick="filterQA('Architecture',this)">Architecture</button>
+      <button class="filter-pill" onclick="filterQA('Ingestion',this)">Ingestion</button>
+      <button class="filter-pill" onclick="filterQA('Advanced',this)">Advanced</button>
+      <button class="filter-pill" onclick="filterQA('Optimization',this)">Optimization</button>
+      <button class="filter-pill" onclick="filterQA('Cost',this)">Cost</button>
+      <button class="filter-pill" onclick="filterQA('Reliability',this)">Reliability</button>
+    </div>
+
+    <div id="qaList"></div>
+
+    <hr>
+    <h2>Best Practices Checklist</h2>
+    <div class="card-grid card-grid-2">
+      <div class="card"><div class="card-header">Architecture Best Practices</div><div class="card-body">
+        <div class="bp-list">
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Always separate compute and storage (S3-based data lake)</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Use Iceberg/Delta for Silver+ layers — ACID transactions</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Partition by query patterns, not source structure</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Target 128 MB – 1 GB per Parquet file</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Implement idempotent writes at every layer</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Bronze is immutable — never overwrite raw data</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Use Infrastructure as Code (CDK/Terraform) for reproducibility</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Tag all resources for cost allocation and governance</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Design for failure — retry logic at every step</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#10B981"></div><span style="font-size:13px;color:#94a3b8">Monitor data freshness, not just job success</span></div>
+        </div>
+      </div></div>
+      <div class="card"><div class="card-header">Security Best Practices</div><div class="card-body">
+        <div class="bp-list">
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">Never use root AWS account — IAM users with MFA</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">Least-privilege IAM roles per service (not per person)</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">Encrypt all S3 buckets with KMS CMK — not SSE-S3</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">Use Secrets Manager — never hardcode credentials</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">Enable S3 Block Public Access at account level</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">VPC endpoints for S3/DynamoDB — no internet routing</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">Lake Formation column-level security for PII fields</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">CloudTrail enabled in all regions — deliver to central S3</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">GuardDuty for threat detection on S3 and IAM activity</span></div>
+          <div class="bp-item"><div class="bp-dot" style="background:#EF4444"></div><span style="font-size:13px;color:#94a3b8">Regular IAM access advisor reviews — remove unused permissions</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="callout success" style="margin-top:20px">
+      <div class="callout-title">Final Recommendation</div>
+      <p>Start with: Kinesis Data Streams (5 shards) + Firehose → S3 Bronze (Parquet) → Glue ETL (Iceberg Silver/Gold) → Redshift RA3.xlplus (2 nodes, scheduled pause) → QuickSight → MWAA orchestration. Total: ~$990/month. Scale Kinesis shards as throughput grows. Migrate to MSK when multi-consumer or &gt;10 GB/day. Adopt EMR Spot for large Spark jobs at 20 GB/day for 60-80% ETL cost savings. Use Apache Iceberg table format throughout Silver/Gold for schema evolution, ACID transactions, and Athena/Glue/Redshift compatibility.</p>
+    </div>
+  </div>
+
+  <p style="text-align:center;color:#1e293b;font-size:11px;margin-top:40px;padding-top:20px;border-top:1px solid #0f172a">AWS Data Engineering Architecture Reference · Generated May 2026</p>
+</div>
+
+<script>
+// Tab navigation
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Comparison sub-tabs
+function showComp(idx, btn) {
+  document.querySelectorAll('.comparison-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('comp'+idx).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Advanced sub-tabs
+function showAdv(idx, btn) {
+  document.querySelectorAll('.adv-panel').forEach(p => p.classList.remove('active'));
+  const allBtns = document.querySelectorAll('#advanced .sub-tab');
+  allBtns.forEach(b => b.classList.remove('active'));
+  document.getElementById('adv'+idx).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Collapsible cards
+document.querySelectorAll('.collapsible .card-header').forEach(h => {
+  h.addEventListener('click', () => h.closest('.collapsible').classList.toggle('open'));
+});
+
+// AWS Services data
+const LAYERS = [
+  { name: "Ingestion", services: [
+    { name:"AWS DMS", purpose:"Database Migration Service — replicates from source DBs to AWS targets", when:"CDC from on-prem / RDS databases; one-time migration or ongoing replication", pros:"Supports 20+ engines; minimal downtime; auto schema conversion", cons:"Expensive at scale; limited transformation; LOB column issues", cost:"$0.18/hr per instance + data transfer", useCase:"Migrate Oracle ERP → Redshift; CDC from MySQL → S3" },
+    { name:"AWS DataSync", purpose:"Accelerated data transfer from on-prem NAS/file systems to S3, EFS, FSx", when:"Large file batch transfers; NFS/SMB shares to S3", pros:"10x faster than rsync; automatic integrity checks; scheduling", cons:"Not for DB replication; file-oriented only", cost:"$0.0125 per GB transferred", useCase:"Transfer 10 TB sensor data from on-prem to S3 nightly" },
+    { name:"API Gateway", purpose:"Managed API endpoint for HTTP/WebSocket event ingestion", when:"REST/WebSocket event streams; mobile/IoT data ingestion", pros:"Serverless; auth built-in; integrates with Lambda/Kinesis", cons:"10 MB payload limit; latency for real-time; cost at high TPS", cost:"$3.50 per million API calls", useCase:"Receive IoT telemetry via REST → Kinesis → S3" },
+    { name:"AWS Transfer Family", purpose:"Managed SFTP/FTP/FTPS server that writes directly to S3 or EFS", when:"Legacy partners sending files via SFTP", pros:"No infrastructure; direct S3 landing; IAM integration", cons:"File-only; no streaming; latency on large transfers", cost:"$0.30/hr per endpoint + $0.04/GB", useCase:"Insurance claims files from partners → S3 bronze layer" },
+  ]},
+  { name: "Streaming", services: [
+    { name:"Kinesis Data Streams", purpose:"Real-time data streaming with ordered shards; sub-second latency", when:"Real-time analytics; event sourcing; log aggregation; <1 MB/s per shard", pros:"Fully managed; 7-day retention; native AWS integrations", cons:"Manual shard scaling; 1000 records/s per shard write limit; expensive at scale", cost:"$0.015/shard-hr + $0.035/million PUT records", useCase:"Clickstream analytics; real-time fraud detection" },
+    { name:"Amazon MSK (Kafka)", purpose:"Managed Apache Kafka — high-throughput distributed streaming with consumer groups", when:"High throughput (>1 GB/s); multi-consumer patterns; complex stream topology", pros:"Kafka-compatible; topic replay; rich ecosystem; horizontal scale", cons:"Operational complexity; higher baseline cost; VPC required", cost:"$0.21/hr per broker (3 brokers min) + storage", useCase:"Event-driven microservices; multi-team data platform" },
+    { name:"Kinesis Firehose", purpose:"Serverless ETL delivery stream — buffers, transforms, and delivers to S3/Redshift/OpenSearch", when:"Simple ingestion pipelines without consumer management; auto-scaling delivery", pros:"Zero ops; auto-scale; built-in format conversion (JSON→Parquet); compression", cons:"No replay; 60-900s buffer delay; single consumer only", cost:"$0.029/GB ingested + data format conversion fee", useCase:"Log delivery to S3; IoT data → Redshift" },
+    { name:"Amazon EventBridge", purpose:"Serverless event bus for routing events between AWS services and SaaS apps", when:"Event-driven orchestration; SaaS integrations; scheduled triggers", pros:"Schema registry; 20+ SaaS partners; replay; filtering rules", cons:"Not for high-volume data streaming; 256 KB event limit", cost:"$1.00 per million custom events", useCase:"Route Salesforce/Shopify events → Lambda → S3" },
+  ]},
+  { name: "Storage", services: [
+    { name:"Amazon S3", purpose:"Object storage — the foundation of every AWS data lake; 11 nines durability", when:"Data lake; archive; staging; any unstructured/semi-structured data", pros:"Unlimited scale; lifecycle policies; versioning; event notifications; extremely cheap", cons:"Eventual consistency for list ops; not POSIX; small-file problem", cost:"$0.023/GB Standard; $0.0125/GB IA; $0.004/GB Glacier", useCase:"Medallion Bronze/Silver/Gold data lake; model artifacts; backups" },
+    { name:"Amazon DynamoDB", purpose:"Serverless NoSQL key-value and document DB with single-digit ms latency", when:"High-speed lookups; metadata store; pipeline state tracking; session data", pros:"Auto-scale; global tables; DynamoDB Streams for CDC; 99.999% HA", cons:"No joins; 400 KB item limit; expensive for large scans; no full SQL", cost:"$1.25/million writes; $0.25/million reads; $0.25/GB storage", useCase:"Pipeline checkpoint state; real-time leaderboard; IoT device registry" },
+    { name:"Amazon RDS / Aurora", purpose:"Managed relational databases (MySQL, Postgres, SQL Server) with HA and read replicas", when:"OLTP workloads; operational databases feeding pipelines via CDC", pros:"Aurora is 5x faster than MySQL; Multi-AZ; auto failover; Aurora Serverless v2", cons:"Max 128 TB; not for analytics at scale; vertical scaling limits", cost:"Aurora Serverless v2: $0.10/ACU-hr; RDS from $0.017/hr", useCase:"Operational DB → DMS CDC → S3 → Redshift pipeline" },
+    { name:"Amazon OpenSearch", purpose:"Managed Elasticsearch/OpenSearch for search, log analytics, and real-time dashboards", when:"Log analytics (ELK); full-text search; near real-time operational dashboards", pros:"Rich query DSL; OpenSearch Dashboards; auto-scaling", cons:"Expensive storage; not a data warehouse; requires mapping management", cost:"$0.042-0.10/hr per data node + storage", useCase:"Application log analytics; security SIEM; product search" },
+  ]},
+  { name: "Processing", services: [
+    { name:"AWS Glue", purpose:"Serverless Spark ETL — auto-scales workers, pays per job run; includes Data Catalog", when:"ETL/ELT at scale; data catalog; schema discovery; Spark jobs without cluster mgmt", pros:"Serverless; built-in catalog; supports Python/Scala; job bookmarks for incremental", cons:"Cold start 2-10 min; expensive for frequent small jobs; limited Spark version control", cost:"$0.44/DPU-hr (2 vCPU, 8 GB RAM per DPU)", useCase:"Daily Silver→Gold transformation; S3 to Redshift ETL" },
+    { name:"Amazon EMR", purpose:"Managed Hadoop/Spark/Hive/Presto cluster — full control over runtime and configuration", when:"Large-scale batch processing; custom Spark apps; ML training; need specific Spark version", pros:"Full Spark control; Spot instances (60-80% savings); supports Iceberg/Delta/Hudi natively", cons:"Operational overhead; cluster startup time; requires tuning expertise", cost:"EMR fee 25% on top of EC2; Spot r5.xlarge ~$0.06/hr vs $0.25 on-demand", useCase:"Petabyte-scale Spark ML; custom Iceberg compaction; large ad-hoc analytics" },
+    { name:"AWS Lambda", purpose:"Serverless functions — event-driven, 15-min max runtime, auto-scaling", when:"Event triggers; lightweight transformations; Firehose data transformation; micro-ETL", pros:"Zero infrastructure; scales to zero; 1ms billing; integrates with all AWS events", cons:"15-min limit; 6 GB RAM max; no persistent state; cold starts; not for large data", cost:"$0.20/million requests + $0.0000166667/GB-second", useCase:"S3 event trigger → validate & route; Firehose record transformation" },
+    { name:"Amazon ECS / EKS", purpose:"Container orchestration for long-running processing workloads", when:"Custom streaming jobs; Flink/Beam apps; multi-step ML pipelines; microservices", pros:"Full control; Spot support; persistent processes; any language/framework", cons:"Higher operational overhead; VPC/networking complexity", cost:"Fargate: $0.04048/vCPU-hr + $0.004445/GB-hr; EKS: $0.10/cluster-hr", useCase:"Long-running Flink jobs on MSK; custom data processing microservices" },
+  ]},
+  { name: "Data Warehouse", services: [
+    { name:"Amazon Redshift", purpose:"Fully managed petabyte-scale columnar data warehouse with Redshift Spectrum for S3 querying", when:"Complex SQL analytics; BI dashboards; structured historical reporting; <1s query SLA", pros:"Columnar compression; Spectrum queries S3 directly; Serverless option; RA3 storage separation", cons:"Not ideal for ad-hoc schema changes; expensive for infrequent queries; COPY load required", cost:"RA3.xlplus: $1.086/hr (2 nodes recommended); Serverless: $0.36/RPU-hr", useCase:"Finance reporting; customer 360; sales analytics dashboard" },
+    { name:"Amazon Athena", purpose:"Serverless SQL query engine on S3 using Presto — pay per query", when:"Ad-hoc queries on S3 data lake; infrequent analytics; cost-sensitive workloads", pros:"Zero infrastructure; $5/TB scanned; works with Glue Catalog; supports Iceberg/Delta", cons:"Not for sub-second BI; no indexes; scan-based pricing penalizes large unpartitioned tables", cost:"$5.00/TB scanned; FREE with Parquet + partitioning (90% scan reduction)", useCase:"Data exploration; log analysis; infrequent ad-hoc queries on data lake" },
+  ]},
+  { name: "Orchestration", services: [
+    { name:"AWS Step Functions", purpose:"Serverless visual workflow orchestrator — DAG of Lambda, ECS, Glue, and other AWS services", when:"AWS-native pipelines; error handling workflows; retry logic; parallel branches", pros:"Visual debugger; built-in retry/catch; Express for high-frequency; integrates 200+ services", cons:"Complex for data-heavy pipelines; state payload limit 256 KB; less powerful than Airflow", cost:"Standard: $0.025/1000 state transitions; Express: $1/million + duration", useCase:"Multi-step ETL orchestration; approval workflows; ML training pipelines" },
+    { name:"Amazon MWAA (Airflow)", purpose:"Managed Apache Airflow — fully managed DAG scheduling and orchestration", when:"Complex data pipelines; multi-system orchestration; cross-cloud; Python DAGs", pros:"Full Airflow ecosystem; Python flexibility; rich operators; widely understood", cons:"Higher cost; cold environment warm-up; requires Airflow expertise", cost:"$0.49/hr (Small) to $2.45/hr (2xlarge) + worker costs", useCase:"Enterprise data platform with 100+ DAGs; cross-system ETL orchestration" },
+    { name:"EventBridge Scheduler", purpose:"Managed cron/rate scheduler for triggering AWS services without infrastructure", when:"Simple time-based triggers; Lambda/Glue/Step Functions scheduling", pros:"Zero infrastructure; timezone support; flexible rate/cron; 99.99% SLA", cons:"Not a DAG orchestrator; no dependency management", cost:"$1.00/million scheduled invocations", useCase:"Trigger nightly Glue ETL job; daily Redshift VACUUM" },
+  ]},
+  { name: "Monitoring", services: [
+    { name:"Amazon CloudWatch", purpose:"AWS-native monitoring — metrics, logs, alarms, dashboards, anomaly detection", when:"AWS service metrics; log aggregation; pipeline failure alerts; custom metrics", pros:"Native integration; log insights SQL; composite alarms; contributor insights", cons:"Expensive log storage; limited query performance vs dedicated log tools", cost:"$0.30/GB logs; $0.01/1000 custom metrics; $0.10/alarm-month", useCase:"Kinesis iterator age alerts; Glue job failure notifications" },
+    { name:"AWS CloudTrail", purpose:"API audit logging — records every AWS API call for security and compliance", when:"Compliance; security auditing; debugging access issues; governance", pros:"Mandatory for compliance; integrates with Athena for analysis; 90-day free", cons:"Not real-time; data event logging costs extra", cost:"Management events: Free (1 trail); Data events: $0.10/100K events", useCase:"Who deleted the S3 data? IAM access audit for SOC2 compliance" },
+  ]},
+  { name: "Governance & Security", services: [
+    { name:"AWS Lake Formation", purpose:"Data lake governance — fine-grained access control on S3/Glue Catalog at column/row level", when:"Multi-team data lake; PII protection; column-level security; data sharing", pros:"Row/column filters; cross-account sharing; tag-based access; audit logs", cons:"Complex setup; not all Glue operations are LF-aware; learning curve", cost:"Free service; pay for underlying Glue/S3 resources", useCase:"PII masking for analyst access; cross-business-unit data sharing" },
+    { name:"AWS IAM", purpose:"Identity and Access Management — roles, policies, permissions for all AWS resources", when:"Every AWS deployment — mandatory foundation for least-privilege access", pros:"Fine-grained policies; assume role for cross-account; ABAC support; free", cons:"Policy complexity; permission debugging is hard; human error risk", cost:"Free", useCase:"Glue job role to read S3, write Redshift; cross-account data lake access" },
+    { name:"AWS KMS", purpose:"Key Management Service — managed encryption keys for data at rest and in transit", when:"Encrypting S3, Redshift, DynamoDB, Kinesis; compliance requirements (HIPAA, PCI)", pros:"Hardware-backed HSM; automatic rotation; CloudTrail audit; integrates with all AWS services", cons:"$0.03/10K API calls adds up at scale; slight latency for envelope encryption", cost:"$1/key-month + $0.03/10K API calls", useCase:"Customer PII encrypted in S3 with CMK; Redshift cluster encryption" },
+    { name:"AWS Secrets Manager", purpose:"Store and rotate database credentials, API keys, and connection strings securely", when:"Any pipeline connecting to databases or external APIs — never hardcode credentials", pros:"Auto-rotation; cross-account access; Lambda rotation hooks; audit via CloudTrail", cons:"$0.40/secret/month adds up; rotation requires Lambda", cost:"$0.40/secret/month + $0.05/10K API calls", useCase:"Glue/Lambda fetching RDS password; Kafka SASL credentials" },
+  ]},
+  { name: "ML & AI", services: [
+    { name:"Amazon SageMaker", purpose:"End-to-end ML platform — training, tuning, deployment, monitoring, and feature store", when:"Custom ML model training; feature engineering at scale; model serving; AutoML", pros:"Integrated with S3/Glue; Feature Store; Model Monitor for drift; Studio IDE", cons:"Complex pricing; steep learning curve; overkill for simple use cases", cost:"Training: ml.m5.xlarge $0.23/hr; Inference: $0.046/hr + requests", useCase:"Predictive maintenance on IoT data; churn scoring; demand forecasting" },
+  ]},
+  { name: "Visualization", services: [
+    { name:"Amazon QuickSight", purpose:"Serverless BI and dashboarding — connects to Redshift, Athena, S3, RDS, and more", when:"Self-service BI; embedded dashboards; ML-powered insights (forecasting, anomaly)", pros:"SPICE in-memory engine; pay-per-session pricing; ML insights; mobile support", cons:"Limited custom visuals vs Tableau/Power BI; SPICE data size limits; UI less mature", cost:"$24/author/month; $0.30/session reader (or $5/reader/month)", useCase:"Executive KPI dashboards on Redshift; embedded analytics in SaaS products" },
+  ]},
+  { name: "Networking", services: [
+    { name:"Amazon VPC", purpose:"Virtual Private Cloud — isolated network for all AWS resources", when:"Every production deployment — network isolation, private connectivity to DBs and clusters", pros:"Full network control; VPC peering; PrivateLink; flow logs for auditing", cons:"Complex networking; NAT Gateway costs ($0.045/hr + $0.045/GB); cross-AZ data transfer fees", cost:"VPC free; NAT GW: $0.045/hr + $0.045/GB; VPC Endpoints: $0.01/hr", useCase:"MSK cluster in private subnets; Redshift in VPC; Glue private S3 access" },
+    { name:"AWS PrivateLink / VPC Endpoints", purpose:"Private connectivity to AWS services without internet routing", when:"Security compliance requiring no internet traffic; S3 access from EMR/Glue/Lambda in VPC", pros:"No internet exposure; no NAT Gateway needed for S3/DynamoDB; lower latency", cons:"Interface endpoints cost $0.01/hr each; DNS resolution complexity", cost:"Gateway (S3, DynamoDB): Free; Interface: $0.01/hr + $0.01/GB", useCase:"EMR in private subnet accessing S3 securely; Lambda→DynamoDB without internet" },
+  ]},
+];
+
+function buildServices() {
+  const el = document.getElementById('svcList');
+  LAYERS.forEach(layer => {
+    const card = document.createElement('div');
+    card.className = 'card collapsible';
+    card.innerHTML = `
+      <div class="card-header" onclick="this.closest('.collapsible').classList.toggle('open')">
+        ${layer.name} Layer
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="pill">${layer.services.length} services</span>
+          <span class="chevron" style="font-size:10px;color:#64748b">▼</span>
+        </div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="table-wrap" style="border:none;border-radius:0">
+          <table>
+            <thead><tr><th>Service</th><th>Purpose</th><th>When to Use</th><th>Pros</th><th>Cons</th><th>Cost</th><th>Use Case</th></tr></thead>
+            <tbody>
+              ${layer.services.map(s => `<tr>
+                <td><span class="service-name">${s.name}</span></td>
+                <td>${s.purpose}</td>
+                <td>${s.when}</td>
+                <td class="muted">${s.pros}</td>
+                <td class="muted">${s.cons}</td>
+                <td><span class="mono">${s.cost}</span></td>
+                <td class="muted">${s.useCase}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+    el.appendChild(card);
+  });
+}
+buildServices();
+
+// Bar charts
+const cost1 = [
+  {l:"Kinesis (5 shards)",v:50},{l:"Firehose",v:15},{l:"S3 (3 layers)",v:25},
+  {l:"Glue ETL",v:40},{l:"Redshift RA3.xlplus",v:280},{l:"MWAA (Small)",v:350},
+  {l:"CloudWatch",v:30},{l:"QuickSight",v:120},{l:"Lambda + API GW",v:20},{l:"DMS",v:60}
+];
+const cost2 = [
+  {l:"Kinesis (30 shards)",v:200},{l:"Firehose",v:175},{l:"S3 (6 months)",v:180},
+  {l:"Glue ETL (scaled)",v:250},{l:"Redshift RA3.4xl",v:750},{l:"MWAA (Medium)",v:600},
+  {l:"CloudWatch + X-Ray",v:100},{l:"QuickSight (20+)",v:480},{l:"Lambda + API GW",v:80},{l:"DMS + MSK",v:400}
+];
+function buildBar(containerId, data) {
+  const max = Math.max(...data.map(d=>d.v));
+  const el = document.getElementById(containerId);
+  el.innerHTML = data.map(d => `
+    <div class="bar-row">
+      <div class="bar-label">${d.l}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(d.v/max*100).toFixed(1)}%;background:#3b82f6">$${d.v}</div></div>
+      <div class="bar-value">$${d.v}</div>
+    </div>`).join('');
+}
+buildBar('costChart1', cost1);
+buildBar('costChart2', cost2);
+
+// Q&A
+const QA = [
+  { q:"Why did you choose Kinesis over Kafka (MSK) for this use case?", a:"At 1 GB/day, Kinesis is ~10x cheaper than MSK ($50/month vs $400+/month) and requires zero infrastructure management. MSK's minimum 3-broker setup costs $200+/month even at idle. We architect a migration path: as throughput crosses 10 GB/day or multi-team consumption emerges, we switch to MSK by using Kafka-compatible producers (kafka-python) from day 1.", cat:"Design Decisions" },
+  { q:"How do you handle exactly-once processing guarantees?", a:"True exactly-once requires end-to-end coordination: (1) Idempotent producers using sequence numbers on Kinesis/Kafka, (2) Transaction-safe consumers using checkpointing in DynamoDB, (3) Idempotent writes to S3 with unique file names or to Redshift using MERGE/UPSERT with dedup keys. Glue job bookmarks provide at-least-once with a dedup step. Full exactly-once is expensive — at-least-once + idempotent writes is the pragmatic production choice.", cat:"Streaming" },
+  { q:"Explain the Medallion Architecture (Bronze/Silver/Gold) and why it matters.", a:"Bronze: Raw, unmodified data as landed — preserves original for reprocessing. Silver: Cleaned, deduplicated, validated. Schema-enforced, business rules applied, PII masked. Gold: Aggregated, business-domain specific — daily sales by region, hourly churn rates. Optimized for BI consumption. The layering provides (1) reprocessability — always re-derive Silver from Bronze, (2) clear ownership — data engineers own Silver, analysts own Gold, (3) blast-radius containment — bad Silver job doesn't corrupt Bronze.", cat:"Architecture" },
+  { q:"What is CDC and how would you implement it on AWS?", a:"Change Data Capture captures row-level INSERT/UPDATE/DELETE operations in real time from source databases. AWS options: (1) AWS DMS with ongoing replication mode — captures WAL logs from Postgres/MySQL, delivers change events to S3 or Kinesis. (2) Debezium on MSK Connect — open-source CDC connector, more flexible, better community support. (3) Aurora MySQL has native binlog streaming. Choose DMS for simplicity, Debezium for Kafka-native architectures.", cat:"Ingestion" },
+  { q:"How do you handle schema evolution in a data pipeline?", a:"Schema evolution is a top-3 production headache. Solutions: (1) Use Apache Iceberg/Hudi — both support schema evolution (add columns, rename fields) with backward/forward compatibility. (2) AWS Glue Schema Registry with Avro/JSON Schema — validates messages at Kinesis/MSK ingestion. (3) Glue Catalog schema versioning — tracks all historical schemas. Strategy: allow additive changes automatically; breaking changes require a new table version or migration script.", cat:"Advanced" },
+  { q:"How do you solve the small file problem in S3-based data lakes?", a:"Small files (<128 MB each) cause excessive S3 API calls and slow Spark/Athena queries. Root cause: frequent micro-batch writes or high-partition-cardinality Firehose delivery. Solutions: (1) Firehose buffer window (60-900s). (2) Glue/EMR compaction job — daily Spark job that reads small files per partition and rewrites as single Parquet files. (3) Apache Iceberg OPTIMIZE procedure. (4) Coalesce/repartition in Spark before writing. Target: 128 MB–1 GB per Parquet file for optimal Athena/Spark read performance.", cat:"Optimization" },
+  { q:"Design a disaster recovery strategy for this pipeline.", a:"RPO: 1 hour. RTO: 4 hours. Strategy: (1) S3 Cross-Region Replication — Bronze/Silver/Gold replicated to secondary region. (2) Redshift snapshot copy — automated snapshots replicated to DR region. (3) Kinesis extended retention (7 days) — replay from last checkpoint. (4) DynamoDB global tables for pipeline state. (5) MWAA in active-passive. (6) Infrastructure as Code (CDK/Terraform) — entire stack deployable in DR region in <2 hours. (7) Regular quarterly DR drills.", cat:"Reliability" },
+  { q:"How would you optimize costs as data grows from 1 GB to 20 GB/day?", a:"(1) S3 Intelligent-Tiering — saves 30-40% on rarely accessed data. (2) Glue job DPU right-sizing — profile job memory usage, reduce DPUs. (3) EMR Spot instances for large Spark jobs — 60-80% savings. (4) Redshift RA3 scheduled pause during off-hours (saves 67%). (5) Athena with partitioning + Parquet — avoid Redshift for ad-hoc queries. (6) Kinesis on-demand mode during growth phase — auto-scales shards, eliminates manual management.", cat:"Cost" },
+  { q:"What partitioning strategy would you use and why?", a:"Bronze: year/month/day/hour — time-based for all sources; enables Glue job bookmark incremental reads. Silver: source/date — add source partition for per-source processing. Gold: date/region — business dimensions most queried in WHERE clauses. Rules: high-cardinality columns (user_id) should NOT be partition keys — creates millions of micro-partitions. Use Iceberg hidden partitioning to abstract partition strategy from query layer. Always query with partition filters.", cat:"Design Decisions" },
+  { q:"Delta Lake vs Apache Iceberg vs Apache Hudi — when to use each on AWS?", a:"Iceberg: AWS's preferred format — native support in Athena, Glue, EMR, and Redshift Spectrum; best schema evolution; hidden partitioning; table maintenance via Glue Data Catalog API. RECOMMENDED for new AWS-native projects. Hudi: Best for CDC/upsert-heavy workloads (MoR vs CoW write modes); built-in compaction; strong DMS integration; used heavily in fintech. Delta Lake: Best for Databricks users; native on EMR but less AWS-native integration; excellent time travel.", cat:"Architecture" },
+];
+
+function filterQA(cat, btn) {
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const list = document.getElementById('qaList');
+  const items = cat === 'All' ? QA : QA.filter(q => q.cat === cat);
+  list.innerHTML = items.map((qa, i) => `
+    <div class="card collapsible ${i===0?'open':''}">
+      <div class="card-header" onclick="this.closest('.collapsible').classList.toggle('open')">
+        <span>${qa.q}</span>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:12px">
+          <span class="pill">${qa.cat}</span>
+          <span class="chevron" style="font-size:10px;color:#64748b">▼</span>
+        </div>
+      </div>
+      <div class="card-body"><p style="font-size:13px;color:#94a3b8">${qa.a}</p></div>
+    </div>`).join('');
+}
+filterQA('All', document.querySelector('.filter-pill'));
+</script>
+</body>
+</html>
